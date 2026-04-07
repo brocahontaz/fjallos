@@ -5,3 +5,4 @@ fjallos.db-wal
 drizzle/
 .env
 dist/
+server.log
