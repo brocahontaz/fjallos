@@ -1,0 +1,7 @@
+node_modules/
+fjallos.db
+fjallos.db-shm
+fjallos.db-wal
+drizzle/
+.env
+dist/

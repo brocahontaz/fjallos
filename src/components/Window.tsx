@@ -1,0 +1,54 @@
+import type { FC, PropsWithChildren } from 'hono/jsx'
+
+interface WindowProps {
+  id: string
+  app: string
+  title: string
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  zIndex?: number
+}
+
+export const Window: FC<PropsWithChildren<WindowProps>> = ({
+  id,
+  app,
+  title,
+  x = 100,
+  y = 80,
+  width = 700,
+  height = 500,
+  zIndex = 10,
+  children,
+}) => {
+  return (
+    <div
+      class="window"
+      id={`win-${id}`}
+      data-app={app}
+      data-window-id={id}
+      style={`--x:${x}px; --y:${y}px; --w:${width}px; --h:${height}px; --z:${zIndex};`}
+      role="dialog"
+      aria-label={title}
+    >
+      <header class="window__chrome" aria-label="Window controls">
+        <span class="window__title">{title}</span>
+        <nav class="window__controls" aria-label="Window actions">
+          <button class="window__btn window__btn--minimise" aria-label="Minimise" data-action="minimise">
+            −
+          </button>
+          <button class="window__btn window__btn--maximise" aria-label="Maximise" data-action="maximise">
+            □
+          </button>
+          <button class="window__btn window__btn--close" aria-label="Close" data-action="close">
+            ×
+          </button>
+        </nav>
+      </header>
+      <div class="window__body" hx-get={`/apps/${app}`} hx-trigger="load">
+        {children}
+      </div>
+    </div>
+  )
+}
