@@ -1,10 +1,10 @@
-import { desc } from 'drizzle-orm'
-import { Hono } from 'hono'
-import { Terminal } from '@/components/apps/Terminal'
 import { sessionMiddleware } from '@/auth/middleware'
+import { Terminal } from '@/components/apps/Terminal'
 import { db } from '@/db/client'
 import { terminalHistory } from '@/db/schema'
 import { executeCommand } from '@/lib/shell'
+import { desc } from 'drizzle-orm'
+import { Hono } from 'hono'
 
 const terminalApp = new Hono()
 

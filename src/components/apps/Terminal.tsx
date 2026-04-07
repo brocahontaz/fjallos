@@ -15,7 +15,7 @@ export const Terminal: FC<TerminalProps> = ({ role, username, history = [] }) =>
           <p>Type `help` to see available commands. Type `startx` to launch the desktop.</p>
         </div>
         {history.map((entry, i) => (
-          <div class="terminal__history-entry" key={i}>
+          <div class="terminal__history-entry" key={`${entry.command}-${i}`}>
             <div class="terminal__prompt-line">
               <span class="terminal__prompt-char">{username}@webdesktop:~$</span>
               <span class="terminal__command">{entry.command}</span>

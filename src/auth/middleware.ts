@@ -1,8 +1,8 @@
+import { db } from '@/db/client'
+import { sessions } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { getCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
-import { db } from '@/db/client'
-import { sessions } from '@/db/schema'
 
 export type SessionRole = 'owner' | 'guest'
 

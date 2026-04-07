@@ -1,6 +1,6 @@
-import { desc, eq, isNull } from 'drizzle-orm'
 import { db } from '@/db/client'
 import { fsNodes, terminalHistory } from '@/db/schema'
+import { desc, eq, isNull } from 'drizzle-orm'
 
 export interface ShellContext {
   role: 'owner' | 'guest'
@@ -39,6 +39,7 @@ const PROJECTS_TEXT = `Projects:
 
 Type 'startx' to explore projects interactively in the GUI.`
 
+// TODO: Replace placeholder CV content with real personal information before deployment
 const CV_TEXT = `Curriculum Vitae
 ════════════════
 
@@ -57,6 +58,7 @@ Skills:
 
 Contact: see 'contact' command`
 
+// TODO: Replace placeholder contact information with real contact details before deployment
 const CONTACT_TEXT = `Contact Information
 ═══════════════════
 

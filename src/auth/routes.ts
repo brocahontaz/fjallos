@@ -1,9 +1,9 @@
+import { db } from '@/db/client'
+import { sessions } from '@/db/schema'
 import { verify } from '@node-rs/bcrypt'
 import { eq, lt } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { deleteCookie, setCookie } from 'hono/cookie'
-import { db } from '@/db/client'
-import { sessions } from '@/db/schema'
 
 const auth = new Hono()
 

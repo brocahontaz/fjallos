@@ -1,14 +1,14 @@
+import { terminalApp } from '@/apps/terminal'
+import { sessionMiddleware } from '@/auth/middleware'
+import { auth } from '@/auth/routes'
+import { Window } from '@/components/Window'
+import { Terminal } from '@/components/apps/Terminal'
+import { db } from '@/db/client'
+import { sessions } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
 import { getCookie } from 'hono/cookie'
-import { auth } from '@/auth/routes'
-import { sessionMiddleware } from '@/auth/middleware'
-import { terminalApp } from '@/apps/terminal'
-import { Terminal } from '@/components/apps/Terminal'
-import { Window } from '@/components/Window'
-import { db } from '@/db/client'
-import { sessions } from '@/db/schema'
 
 const app = new Hono()
 
@@ -132,13 +132,16 @@ app.post('/windows/open', sessionMiddleware, async (c) => {
 
   const taskbarUpdate = (
     <div id="taskbar-apps" hx-swap-oob="beforeend">
-      <button
-        class="taskbar__app-btn taskbar__app-btn--running"
-        data-win-id={`win-${winId}`}
-        onclick={`document.getElementById('win-${winId}')?.classList.remove('window--minimised')`}
-      >
-        {titleMap[appName] ?? appName}
-      </button>
+      <li>
+        <button
+          type="button"
+          class="taskbar__app-btn taskbar__app-btn--running"
+          data-win-id={`win-${winId}`}
+          onclick={`document.getElementById('win-${winId}')?.classList.remove('window--minimised')`}
+        >
+          {titleMap[appName] ?? appName}
+        </button>
+      </li>
     </div>
   )
 
@@ -296,10 +299,11 @@ function getGuiLoginHTML(): string {
 </html>`
 }
 
-const port = parseInt(process.env.PORT ?? '3000', 10)
+const port = Number.parseInt(process.env.PORT ?? '3000', 10)
 console.log(`Server starting on http://localhost:${port}`)
 
 export default {
   port,
+  hostname: '0.0.0.0',
   fetch: app.fetch,
 }
