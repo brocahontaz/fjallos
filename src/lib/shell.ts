@@ -125,7 +125,7 @@ export async function executeCommand(
       const validThemes = ['dark', 'light', 'matrix', 'retro']
       if (!themeName) {
         result = {
-          output: `Current themes: ${validThemes.join(', ')}\nUsage: theme <name>`,
+          output: `Available themes: ${validThemes.join(', ')}\nUsage: theme <name>`,
           exitCode: 0,
         }
       } else if (!validThemes.includes(themeName)) {

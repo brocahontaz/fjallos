@@ -1,5 +1,5 @@
 import { verify } from '@node-rs/bcrypt'
-import { eq } from 'drizzle-orm'
+import { eq, lt } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { deleteCookie, setCookie } from 'hono/cookie'
 import { db } from '@/db/client'
@@ -71,7 +71,7 @@ auth.post('/login', async (c) => {
   }
 
   const now = new Date().toISOString()
-  await db.delete(sessions).where(eq(sessions.expiresAt, now))
+  await db.delete(sessions).where(lt(sessions.expiresAt, now))
 
   const sessionId = generateId()
   const csrfToken = generateCsrfToken()
