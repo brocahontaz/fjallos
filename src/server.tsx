@@ -187,7 +187,7 @@ app.post('/windows/open', sessionMiddleware, async (c) => {
 
 app.delete('/windows/:id', sessionMiddleware, csrfMiddleware, (c) => {
   const id = c.req.param('id')
-  return c.html(<button id={`taskbar-btn-${id}`} hx-swap-oob="delete"></button>)
+  return c.html(<button type="button" id={`taskbar-btn-${id}`} hx-swap-oob="delete" />)
 })
 
 // App content - register terminal route BEFORE wildcard
@@ -226,7 +226,7 @@ function getDesktopHTML(role: 'owner' | 'guest', csrfToken: string, reset = fals
     <ul class="context-menu" id="desktop-context-menu" popover="manual" role="menu">
       <li><button class="context-menu__item" role="menuitem"
         hx-post="/windows/open" hx-vals='{"app":"terminal"}' hx-target="#windows-container"
-        hx-swap="beforeend" hx-headers='js:{"HX-CSRF-Token": document.getElementById("desktop").dataset.csrf}'
+        hx-swap="beforeend"
         onclick="document.getElementById('desktop-context-menu').hidePopover()">
         Open Terminal
       </button></li>
@@ -246,7 +246,6 @@ function getDesktopHTML(role: 'owner' | 'guest', csrfToken: string, reset = fals
           hx-vals='{"app":"terminal"}'
           hx-target="#windows-container"
           hx-swap="beforeend"
-          hx-headers='js:{"HX-CSRF-Token": document.getElementById("desktop").dataset.csrf}'
         >
           <span aria-hidden="true">⬛</span> Terminal
         </button>
@@ -267,6 +266,12 @@ function getDesktopHTML(role: 'owner' | 'guest', csrfToken: string, reset = fals
         el.setAttribute('datetime', now.toISOString())
       }
     }
+
+    // Inject CSRF token globally into every HTMX request
+    document.body.addEventListener('htmx:configRequest', (e) => {
+      const csrf = document.getElementById('desktop')?.dataset.csrf
+      if (csrf) e.detail.headers['HX-CSRF-Token'] = csrf
+    })
 
     // Desktop right-click context menu
     const contextMenu = document.getElementById('desktop-context-menu')

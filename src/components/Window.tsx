@@ -57,7 +57,6 @@ export const Window: FC<PropsWithChildren<WindowProps>> = ({
             hx-delete={`/windows/${id}`}
             hx-target={`#win-${id}`}
             hx-swap="delete"
-            hx-headers='js:{"HX-CSRF-Token": document.getElementById("desktop")?.dataset.csrf}'
           >
             ×
           </button>
