@@ -218,6 +218,7 @@ function getDesktopHTML(role: 'owner' | 'guest', csrfToken: string, reset = fals
   <link rel="stylesheet" href="/public/css/apps/terminal.css" />
   <script src="https://unpkg.com/htmx.org@2.0.3" defer></script>
   <script src="/public/js/window-manager.js" type="module" defer></script>
+  <script src="/public/js/gui-terminal.js" type="module" defer></script>
 </head>
 <body>
   <div class="desktop" data-theme="dark" id="desktop" data-csrf="${csrfToken}" data-role="${role}"${reset ? ' data-reset-layout="1"' : ''}>

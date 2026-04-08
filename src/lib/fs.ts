@@ -17,20 +17,59 @@ export async function getRoot(): Promise<FsNode | null> {
   return (result[0] as FsNode) ?? null
 }
 
+/** Get or create the root directory node. */
+export async function ensureRoot(): Promise<FsNode> {
+  const existing = await getRoot()
+  if (existing) return existing
+  const rows = await db
+    .insert(fsNodes)
+    .values({ parentId: null, name: 'root', type: 'dir' })
+    .returning()
+  return rows[0] as FsNode
+}
+
 export async function getChildren(parentId: number): Promise<FsNode[]> {
   return db.select().from(fsNodes).where(eq(fsNodes.parentId, parentId)) as Promise<FsNode[]>
 }
 
-export async function getNodeByPath(path: string): Promise<FsNode | null> {
-  const parts = path.replace(/^\//, '').split('/').filter(Boolean)
+/**
+ * Resolve a path against a cwd, handling `.`, `..`, `~`, and `/`.
+ * All paths are internally represented as `~` or `~/segment/segment`.
+ */
+export function resolvePath(cwd: string, input: string): string {
+  if (!input || input === '~') return '~'
 
-  let current = await getRoot()
-  if (!current) return null
+  let base: string
+  if (input.startsWith('~/') || input === '~') {
+    base = input
+  } else if (input.startsWith('/')) {
+    base = `~${input}`
+  } else {
+    base = cwd === '~' ? `~/${input}` : `${cwd}/${input}`
+  }
 
+  // Normalize: handle . and ..
+  const parts = base.split('/')
+  const result: string[] = []
   for (const part of parts) {
-    if (part === '~') continue
+    if (part === '.' || part === '') continue
+    if (part === '..') {
+      if (result.length > 1) result.pop() // never pop '~'
+    } else {
+      result.push(part)
+    }
+  }
+  return result.join('/') || '~'
+}
+
+export async function getNodeByPath(path: string): Promise<FsNode | null> {
+  const segments = path.replace(/^~\/?/, '').split('/').filter(Boolean)
+
+  let current = await ensureRoot()
+
+  for (const segment of segments) {
     const children = await getChildren(current.id)
-    const match = children.find((c) => c.name === part)
+    const match = children.find((c) => c.name === segment)
     if (!match) return null
     current = match
   }

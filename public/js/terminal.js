@@ -16,6 +16,7 @@ let csrfToken = ''
 let commandHistory = []
 let historyIndex = -1
 let bootAborted = false
+let cwd = '~'
 
 const BOOT_LINES = [
   { text: 'fjallos v0.1.0 -- personal web desktop', cls: 'tty__boot-line--info', delay: 0 },
@@ -159,7 +160,8 @@ function writeLine(text, cls = '') {
   output.scrollTop = output.scrollHeight
 }
 
-function writeShellLine(promptText, cmd, outputText) {
+/** @param {string} html — server-generated ANSI→HTML (text is already escaped) */
+function writeShellLine(promptText, cmd, html) {
   const entry = document.createElement('div')
 
   const promptLine = document.createElement('div')
@@ -178,15 +180,49 @@ function writeShellLine(promptText, cmd, outputText) {
   promptLine.appendChild(c)
   entry.appendChild(promptLine)
 
-  if (outputText) {
+  if (html) {
     const o = document.createElement('pre')
     o.className = 'tty__shell-output'
-    o.textContent = outputText
+    o.innerHTML = html
     entry.appendChild(o)
   }
 
   output.insertBefore(entry, inputLine)
   output.scrollTop = output.scrollHeight
+}
+
+function getPromptText() {
+  return `${username}@webdesktop:${cwd}$`
+}
+
+/** Read SSE events from a fetch Response. Calls onHtml for each html fragment. */
+async function readStream(response, onHtml) {
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let donePayload = null
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue
+      try {
+        const data = JSON.parse(line.slice(6))
+        if (data.html) onHtml(data.html)
+        if (data.done) donePayload = data
+      } catch {
+        // ignore malformed event
+      }
+    }
+  }
+
+  return donePayload
 }
 
 async function runBoot() {
@@ -251,8 +287,9 @@ async function handleEnter() {
           'tty__boot-line--dim',
         )
         writeLine('', '')
+        cwd = '~'
         state = 'shell'
-        showInput(`${username}@webdesktop:~$ `)
+        showInput(`${getPromptText()} `)
       } else {
         writeLine(`Login failed: ${data.error ?? 'incorrect credentials'}`, 'tty__boot-line--err')
         writeLine('', '')
@@ -273,7 +310,7 @@ async function handleEnter() {
 
   if (state === 'shell') {
     const cmd = val.trim()
-    const promptText = `${username}@webdesktop:~$`
+    const promptText = getPromptText()
 
     if (cmd) {
       commandHistory.unshift(cmd)
@@ -286,6 +323,8 @@ async function handleEnter() {
       return
     }
 
+    inputLine.hidden = true
+
     try {
       const res = await fetch('/apps/terminal/execute', {
         method: 'POST',
@@ -293,34 +332,48 @@ async function handleEnter() {
           'Content-Type': 'application/json',
           'X-CSRF-Token': csrfToken,
         },
-        body: JSON.stringify({ command: cmd }),
+        body: JSON.stringify({ command: cmd, cwd, mode: 'tty' }),
       })
 
-      const result = await res.json()
-      writeShellLine(promptText, cmd, result.output ?? '')
+      let accumulatedHtml = ''
+      const result = await readStream(res, (html) => {
+        accumulatedHtml += html
+      })
 
-      if (result.action === 'clear') {
-        while (output.firstChild !== inputLine) output.removeChild(output.firstChild)
-      } else if (result.action === 'logout') {
-        await doLogout()
-      } else if (result.action === 'reboot') {
-        await doReboot()
-      } else if (result.action === 'startx' || result.action === 'startx-reset') {
-        await sleep(300)
-        const dest = result.action === 'startx-reset' ? '/gui?reset=1' : '/gui'
-        if (document.startViewTransition) {
-          document.startViewTransition(() => {
-            window.location.href = dest
-          })
-        } else {
-          window.location.href = dest
+      writeShellLine(promptText, cmd, accumulatedHtml)
+
+      if (result) {
+        if (result.newCwd) {
+          cwd = result.newCwd
         }
-      } else if (result.action === 'theme' && result.themeValue) {
-        tty.setAttribute('data-theme', result.themeValue)
+        if (result.action === 'clear') {
+          while (output.firstChild !== inputLine) output.removeChild(output.firstChild)
+        } else if (result.action === 'logout') {
+          await doLogout()
+          return
+        } else if (result.action === 'reboot') {
+          await doReboot()
+          return
+        } else if (result.action === 'startx' || result.action === 'startx-reset') {
+          await sleep(300)
+          const dest = result.action === 'startx-reset' ? '/gui?reset=1' : '/gui'
+          if (document.startViewTransition) {
+            document.startViewTransition(() => {
+              window.location.href = dest
+            })
+          } else {
+            window.location.href = dest
+          }
+          return
+        } else if (result.action === 'theme' && result.themeValue) {
+          tty.setAttribute('data-theme', result.themeValue)
+        }
       }
     } catch {
-      writeShellLine(promptText, cmd, 'Error: could not reach server')
+      writeShellLine(promptText, cmd, '<span class="ansi-red">Error: could not reach server</span>')
     }
+
+    showInput(`${getPromptText()} `)
   }
 }
 
@@ -338,6 +391,7 @@ async function doLogout() {
   username = ''
   password = ''
   csrfToken = ''
+  cwd = '~'
   commandHistory = []
   historyIndex = -1
 
@@ -416,8 +470,9 @@ const existingCsrf = tty.dataset.sessionCsrf
 if (existingRole && existingUsername && existingCsrf) {
   username = existingUsername
   csrfToken = existingCsrf
+  cwd = '~'
   state = 'shell'
-  showInput(`${username}@webdesktop:~$ `)
+  showInput(`${getPromptText()} `)
 } else {
   runBoot()
 }

@@ -190,3 +190,69 @@
     caret-color: var(--tty-cursor, #58a6ff);
   }
 }
+
+/* ANSI colour / style classes — used in both TTY and GUI terminal windows */
+@layer components {
+  .ansi-bold {
+    font-weight: 700;
+  }
+  .ansi-dim {
+    opacity: 0.6;
+  }
+  .ansi-italic {
+    font-style: italic;
+  }
+  .ansi-underline {
+    text-decoration: underline;
+  }
+
+  .ansi-black {
+    color: #484f58;
+  }
+  .ansi-red {
+    color: var(--tty-red, #f85149);
+  }
+  .ansi-green {
+    color: var(--tty-green, #3fb950);
+  }
+  .ansi-yellow {
+    color: var(--tty-yellow, #d29922);
+  }
+  .ansi-blue {
+    color: var(--tty-blue, #58a6ff);
+  }
+  .ansi-magenta {
+    color: #bc8cff;
+  }
+  .ansi-cyan {
+    color: #39d353;
+  }
+  .ansi-white {
+    color: var(--tty-fg, #c9d1d9);
+  }
+
+  .ansi-bright-black {
+    color: #6e7681;
+  }
+  .ansi-bright-red {
+    color: #ff7b72;
+  }
+  .ansi-bright-green {
+    color: #56d364;
+  }
+  .ansi-bright-yellow {
+    color: #e3b341;
+  }
+  .ansi-bright-blue {
+    color: #79c0ff;
+  }
+  .ansi-bright-magenta {
+    color: #d2a8ff;
+  }
+  .ansi-bright-cyan {
+    color: #56d4dd;
+  }
+  .ansi-bright-white {
+    color: #f0f6fc;
+  }
+}

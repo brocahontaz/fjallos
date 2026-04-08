@@ -8,11 +8,11 @@ interface TerminalProps {
 
 export const Terminal: FC<TerminalProps> = ({ role, username, history = [] }) => {
   return (
-    <div class="terminal" data-role={role} data-username={username}>
-      <div class="terminal__output" id="terminal-output" aria-live="polite" role="log">
+    <div class="terminal" data-role={role} data-username={username} data-mode="gui">
+      <div class="terminal__output" aria-live="polite" role="log">
         <div class="terminal__motd">
           <p>Logged in as: {username}</p>
-          <p>Type `help` to see available commands. Type `startx` to launch the desktop.</p>
+          <p>Type `help` to see available commands. Type `exit` to close.</p>
         </div>
         {history.map((entry, i) => (
           <div class="terminal__history-entry" key={`${entry.command}-${i}`}>
@@ -20,7 +20,13 @@ export const Terminal: FC<TerminalProps> = ({ role, username, history = [] }) =>
               <span class="terminal__prompt-char">{username}@webdesktop:~$</span>
               <span class="terminal__command">{entry.command}</span>
             </div>
-            {entry.output && <pre class="terminal__output-text">{entry.output}</pre>}
+            {entry.output && (
+              <pre
+                class="terminal__output-text"
+                // biome-ignore lint/security/noDangerouslySetInnerHtml: server-generated ANSI→HTML, text is escaped
+                dangerouslySetInnerHTML={{ __html: entry.output }}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -31,7 +37,6 @@ export const Terminal: FC<TerminalProps> = ({ role, username, history = [] }) =>
         <input
           class="terminal__input"
           type="text"
-          id="terminal-input"
           aria-label="Terminal input"
           autocomplete="off"
           autocorrect="off"
