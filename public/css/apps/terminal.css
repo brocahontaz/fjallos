@@ -19,7 +19,9 @@
     overflow: hidden;
     background: var(--tty-bg, #0d1117);
     color: var(--tty-fg, #c9d1d9);
-    transition: background 0.3s ease, color 0.3s ease;
+    transition:
+      background 0.3s ease,
+      color 0.3s ease;
   }
 
   .tty__output {
@@ -30,7 +32,7 @@
     word-break: break-all;
     scrollbar-width: thin;
     scrollbar-color: var(--tty-dim, #484f58) transparent;
-    padding-bottom: var(--space-2, 0.5rem);
+    padding-bottom: var(--space-4, 1rem);
   }
 
   .tty__output::-webkit-scrollbar {
@@ -50,8 +52,6 @@
     display: flex;
     align-items: center;
     gap: var(--space-2, 0.5rem);
-    flex-shrink: 0;
-    padding-top: var(--space-1, 0.25rem);
   }
 
   .tty__prompt {
@@ -82,11 +82,21 @@
     margin-bottom: 1px;
   }
 
-  .tty__boot-line--ok { color: var(--tty-green, #3fb950); }
-  .tty__boot-line--warn { color: var(--tty-yellow, #d29922); }
-  .tty__boot-line--err { color: var(--tty-red, #f85149); }
-  .tty__boot-line--dim { color: var(--tty-dim, #484f58); }
-  .tty__boot-line--info { color: var(--tty-blue, #58a6ff); }
+  .tty__boot-line--ok {
+    color: var(--tty-green, #3fb950);
+  }
+  .tty__boot-line--warn {
+    color: var(--tty-yellow, #d29922);
+  }
+  .tty__boot-line--err {
+    color: var(--tty-red, #f85149);
+  }
+  .tty__boot-line--dim {
+    color: var(--tty-dim, #484f58);
+  }
+  .tty__boot-line--info {
+    color: var(--tty-blue, #58a6ff);
+  }
 
   .tty__login-label {
     color: var(--tty-fg, #c9d1d9);

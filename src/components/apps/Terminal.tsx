@@ -20,14 +20,14 @@ export const Terminal: FC<TerminalProps> = ({ role, username, history = [] }) =>
               <span class="terminal__prompt-char">{username}@webdesktop:~$</span>
               <span class="terminal__command">{entry.command}</span>
             </div>
-            {entry.output && (
-              <pre class="terminal__output-text">{entry.output}</pre>
-            )}
+            {entry.output && <pre class="terminal__output-text">{entry.output}</pre>}
           </div>
         ))}
       </div>
       <div class="terminal__input-line">
-        <span class="terminal__prompt-char" aria-hidden="true">{username}@webdesktop:~$</span>
+        <span class="terminal__prompt-char" aria-hidden="true">
+          {username}@webdesktop:~$
+        </span>
         <input
           class="terminal__input"
           type="text"

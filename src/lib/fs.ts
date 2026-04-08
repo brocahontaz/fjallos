@@ -13,11 +13,7 @@ export interface FsNode {
 }
 
 export async function getRoot(): Promise<FsNode | null> {
-  const result = await db
-    .select()
-    .from(fsNodes)
-    .where(isNull(fsNodes.parentId))
-    .limit(1)
+  const result = await db.select().from(fsNodes).where(isNull(fsNodes.parentId)).limit(1)
   return (result[0] as FsNode) ?? null
 }
 

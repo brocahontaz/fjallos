@@ -173,7 +173,10 @@ function setupControls(win) {
       const winId = win.id
       const taskbarBtn = document.querySelector(`[data-win-id="${winId}"]`)
       if (taskbarBtn) {
-        taskbarBtn.classList.toggle('taskbar__app-btn--minimised', win.classList.contains('window--minimised'))
+        taskbarBtn.classList.toggle(
+          'taskbar__app-btn--minimised',
+          win.classList.contains('window--minimised'),
+        )
       }
     } else if (action === 'maximise') {
       const wasMaximised = win.classList.contains('window--maximised')

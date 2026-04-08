@@ -94,12 +94,7 @@ Managed entirely in client-side JS (`window-manager.js`) — pure UI state, no s
 **DOM model:**
 
 ```html
-<div
-  class="window"
-  id="win-{id}"
-  data-app="{appName}"
-  style="--x:…; --y:…; --w:…; --h:…;"
->
+<div class="window" id="win-{id}" data-app="{appName}" style="--x:…; --y:…; --w:…; --h:…;">
   <header class="window__chrome">
     <span class="window__title">…</span>
     <nav class="window__controls">…</nav>

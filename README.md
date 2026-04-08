@@ -9,17 +9,17 @@ A browser-based personal web desktop that doubles as a portfolio site. The exper
 
 ## Tech Stack
 
-| Concern | Choice |
-|---|---|
-| Runtime | Bun |
-| Framework | Hono + JSX (server-side) |
-| Interactivity | HTMX 2.x |
-| Styling | Vanilla CSS (layers, nesting, custom properties) |
-| Scripting | Vanilla ES2024+ modules |
-| Database | SQLite via Drizzle ORM |
-| Formatting | Prettier |
-| Linting | Biome |
-| Git hooks | Lefthook |
+| Concern       | Choice                                           |
+| ------------- | ------------------------------------------------ |
+| Runtime       | Bun                                              |
+| Framework     | Hono + JSX (server-side)                         |
+| Interactivity | HTMX 2.x                                         |
+| Styling       | Vanilla CSS (layers, nesting, custom properties) |
+| Scripting     | Vanilla ES2024+ modules                          |
+| Database      | SQLite via Drizzle ORM                           |
+| Formatting    | Prettier                                         |
+| Linting       | Biome                                            |
+| Git hooks     | Lefthook                                         |
 
 ## Getting Started
 
@@ -68,11 +68,11 @@ bun run db:migrate # Run DB migrations
 
 ## Phases
 
-| Phase | Name | Status |
-|---|---|---|
-| 1 | Foundation | ✅ Complete |
-| 2 | Terminal | Not started |
-| 3 | File Explorer & Text Editor | Not started |
-| 4 | Polish & Apps | Not started |
-| 5 | Deployment | Not started |
-| 6 | Mobile | Not started |
+| Phase | Name                        | Status      |
+| ----- | --------------------------- | ----------- |
+| 1     | Foundation                  | ✅ Complete |
+| 2     | Terminal                    | Not started |
+| 3     | File Explorer & Text Editor | Not started |
+| 4     | Polish & Apps               | Not started |
+| 5     | Deployment                  | Not started |
+| 6     | Mobile                      | Not started |

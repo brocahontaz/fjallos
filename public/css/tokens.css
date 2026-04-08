@@ -51,7 +51,7 @@
     --z-modal: 300;
   }
 
-  [data-theme="light"] {
+  [data-theme='light'] {
     --color-bg-0: #f5f5f5;
     --color-bg-1: #ffffff;
     --color-bg-2: #e8e8e8;
@@ -65,7 +65,7 @@
     --tty-blue: #0366d6;
   }
 
-  [data-theme="matrix"] {
+  [data-theme='matrix'] {
     --tty-bg: #000000;
     --tty-fg: #00ff41;
     --tty-green: #00ff41;
@@ -74,7 +74,7 @@
     --tty-dim: #003311;
   }
 
-  [data-theme="retro"] {
+  [data-theme='retro'] {
     --tty-bg: #1a0a00;
     --tty-fg: #ff8c00;
     --tty-green: #ffb347;

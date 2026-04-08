@@ -43,7 +43,9 @@ sqlite.exec(`
   );
 `)
 
-const rootExists = sqlite.query('SELECT id FROM fs_nodes WHERE parent_id IS NULL AND name = ?').get('~')
+const rootExists = sqlite
+  .query('SELECT id FROM fs_nodes WHERE parent_id IS NULL AND name = ?')
+  .get('~')
 if (!rootExists) {
   sqlite.exec(`
     INSERT INTO fs_nodes (parent_id, name, type) VALUES (NULL, '~', 'dir');

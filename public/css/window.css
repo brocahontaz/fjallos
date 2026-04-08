@@ -18,7 +18,9 @@
   }
 
   .window.window--focused {
-    box-shadow: var(--window-shadow), 0 0 0 1px rgba(88, 166, 255, 0.3);
+    box-shadow:
+      var(--window-shadow),
+      0 0 0 1px rgba(88, 166, 255, 0.3);
   }
 
   .window.window--minimised {
@@ -86,7 +88,9 @@
     border-radius: 50%;
     font-size: 12px;
     line-height: 1;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition:
+      background var(--transition-fast),
+      color var(--transition-fast);
     color: transparent;
   }
 
