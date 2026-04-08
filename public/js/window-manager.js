@@ -15,6 +15,14 @@ function bringToFront(win) {
   win.classList.add('window--focused')
 }
 
+function updateLauncherState(app) {
+  if (!app) return
+  const launcher = document.getElementById(`taskbar-launcher-${app}`)
+  if (!launcher) return
+  const hasWindows = document.querySelector(`.window[data-app="${app}"]`) !== null
+  launcher.classList.toggle('taskbar__app-btn--active', hasWindows)
+}
+
 function getWindowRect(win) {
   return {
     x: parseInt(win.style.getPropertyValue('--x') || '100', 10),
@@ -248,15 +256,49 @@ function observeWindows() {
       mutation.addedNodes.forEach((node) => {
         if (node instanceof HTMLElement && node.classList.contains('window')) {
           setupWindow(node)
+          updateLauncherState(node.dataset.app)
         }
       })
-      // Save when windows are removed too
+      mutation.removedNodes.forEach((node) => {
+        if (node instanceof HTMLElement && node.classList.contains('window')) {
+          updateLauncherState(node.dataset.app)
+        }
+      })
       if (mutation.removedNodes.length) saveAllLayouts()
     })
   })
 
   observer.observe(container, { childList: true })
   container.querySelectorAll('.window').forEach(setupWindow)
+
+  // Taskbar launcher: focus existing window or open new
+  document.getElementById('taskbar-apps')?.addEventListener(
+    'click',
+    (e) => {
+      const btn = e.target.closest('[data-app]')
+      if (!btn) return
+      e.preventDefault()
+      const app = btn.dataset.app
+      const wins = [...document.querySelectorAll(`.window[data-app="${app}"]`)]
+      if (wins.length > 0) {
+        const top = wins.reduce((a, b) =>
+          parseInt(a.style.getPropertyValue('--z') || '0') >=
+          parseInt(b.style.getPropertyValue('--z') || '0')
+            ? a
+            : b,
+        )
+        top.classList.remove('window--minimised')
+        bringToFront(top)
+      } else {
+        htmx.ajax('POST', '/windows/open', {
+          target: '#windows-container',
+          swap: 'beforeend',
+          values: { app },
+        })
+      }
+    },
+    { capture: true },
+  )
 }
 
 if (document.readyState === 'loading') {

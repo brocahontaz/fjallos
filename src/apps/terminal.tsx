@@ -4,7 +4,6 @@ import { db } from '@/db/client'
 import { terminalHistory } from '@/db/schema'
 import { ansiToHtml } from '@/lib/ansi'
 import { executeCommand } from '@/lib/shell'
-import { desc } from 'drizzle-orm'
 import { Hono } from 'hono'
 
 const terminalApp = new Hono()
@@ -13,24 +12,7 @@ terminalApp.get('/', sessionMiddleware, async (c) => {
   const session = c.get('session')
   const username = session.role === 'owner' ? (process.env.OWNER_USERNAME ?? 'admin') : 'guest'
 
-  // Only load history for owner
-  const history =
-    session.role === 'owner'
-      ? await db
-          .select()
-          .from(terminalHistory)
-          .orderBy(desc(terminalHistory.ranAt))
-          .limit(50)
-          .then((rows) => rows.reverse())
-      : []
-
-  return c.html(
-    <Terminal
-      role={session.role}
-      username={username}
-      history={history.map((h) => ({ command: h.command, output: ansiToHtml(h.output ?? '') }))}
-    />,
-  )
+  return c.html(<Terminal role={session.role} username={username} />)
 })
 
 terminalApp.post('/execute', sessionMiddleware, csrfMiddleware, async (c) => {

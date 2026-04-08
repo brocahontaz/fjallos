@@ -38,7 +38,7 @@ function initTerminal(term) {
 
   const outputEl = term.querySelector('.terminal__output')
   const inputLineEl = term.querySelector('.terminal__input-line')
-  const promptEl = term.querySelector('.terminal__prompt-char')
+  const promptEl = inputLineEl?.querySelector('.terminal__prompt-char')
   const inputEl = term.querySelector('.terminal__input')
 
   if (!outputEl || !inputEl) return
@@ -90,7 +90,7 @@ function initTerminal(term) {
       entry.appendChild(pre)
     }
 
-    outputEl.appendChild(entry)
+    outputEl.insertBefore(entry, inputLineEl)
     outputEl.scrollTop = outputEl.scrollHeight
   }
 
@@ -137,17 +137,12 @@ function initTerminal(term) {
 
         const action = donePayload.action
         if (action === 'clear') {
-          outputEl.innerHTML = ''
+          while (outputEl.firstChild !== inputLineEl) {
+            outputEl.removeChild(outputEl.firstChild)
+          }
         } else if (action === 'close-window') {
           const win = term.closest('.window')
-          if (win) {
-            const winId = win.id?.replace('win-', '')
-            if (winId) {
-              const btn = document.getElementById(`taskbar-btn-${winId}`)
-              if (btn) btn.remove()
-            }
-            win.remove()
-          }
+          if (win) win.remove()
         } else if (action === 'theme' && donePayload.themeValue) {
           document.getElementById('tty')?.setAttribute('data-theme', donePayload.themeValue)
           document.getElementById('desktop')?.setAttribute('data-theme', donePayload.themeValue)
@@ -181,15 +176,18 @@ function initTerminal(term) {
       }
     } else if (e.key === 'l' && e.ctrlKey) {
       e.preventDefault()
-      outputEl.innerHTML = ''
+      while (outputEl.firstChild !== inputLineEl) {
+        outputEl.removeChild(outputEl.firstChild)
+      }
     }
   })
 
   // Focus input when clicking anywhere in the terminal
   term.addEventListener('click', () => inputEl.focus())
 
-  // Set initial prompt text
+  // Set initial prompt text and scroll to show input
   updatePrompt()
+  outputEl.scrollTop = outputEl.scrollHeight
   inputEl.focus()
 }
 

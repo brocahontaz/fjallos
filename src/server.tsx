@@ -161,33 +161,11 @@ app.post('/windows/open', sessionMiddleware, async (c) => {
     />
   )
 
-  const taskbarUpdate = (
-    <div id="taskbar-apps" hx-swap-oob="beforeend">
-      <li>
-        <button
-          id={`taskbar-btn-${winId}`}
-          type="button"
-          class="taskbar__app-btn taskbar__app-btn--running"
-          data-win-id={`win-${winId}`}
-          onclick={`document.getElementById('win-${winId}')?.classList.remove('window--minimised')`}
-        >
-          {titleMap[appName] ?? appName}
-        </button>
-      </li>
-    </div>
-  )
-
-  return c.html(
-    <>
-      {windowHtml}
-      {taskbarUpdate}
-    </>,
-  )
+  return c.html(windowHtml)
 })
 
-app.delete('/windows/:id', sessionMiddleware, csrfMiddleware, (c) => {
-  const id = c.req.param('id')
-  return c.html(<button type="button" id={`taskbar-btn-${id}`} hx-swap-oob="delete" />)
+app.delete('/windows/:id', sessionMiddleware, csrfMiddleware, () => {
+  return new Response(null, { status: 204 })
 })
 
 // App content - register terminal route BEFORE wildcard
@@ -240,13 +218,12 @@ function getDesktopHTML(role: 'owner' | 'guest', csrfToken: string, reset = fals
       </div>
       <div class="taskbar__apps" id="taskbar-apps" role="list" aria-label="Running applications">
         <button
+          id="taskbar-launcher-terminal"
+          type="button"
           class="taskbar__app-btn"
           role="listitem"
-          aria-label="Open Terminal"
-          hx-post="/windows/open"
-          hx-vals='{"app":"terminal"}'
-          hx-target="#windows-container"
-          hx-swap="beforeend"
+          aria-label="Terminal"
+          data-app="terminal"
         >
           <span aria-hidden="true">⬛</span> Terminal
         </button>
