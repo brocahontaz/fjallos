@@ -22,10 +22,26 @@ const BOOT_LINES = [
   { text: '', cls: '', delay: 80 },
   { text: '[    0.000] Initializing kernel...', cls: 'tty__boot-line--dim', delay: 120 },
   { text: '[    0.042] Loading drivers...', cls: 'tty__boot-line--dim', delay: 180 },
-  { text: '[    0.118] Mounting filesystem...           [ OK ]', cls: 'tty__boot-line--ok', delay: 280 },
-  { text: '[    0.204] Starting network services...     [ OK ]', cls: 'tty__boot-line--ok', delay: 400 },
-  { text: '[    0.331] Starting database...             [ OK ]', cls: 'tty__boot-line--ok', delay: 520 },
-  { text: '[    0.412] Starting web server...           [ OK ]', cls: 'tty__boot-line--ok', delay: 640 },
+  {
+    text: '[    0.118] Mounting filesystem...           [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 280,
+  },
+  {
+    text: '[    0.204] Starting network services...     [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 400,
+  },
+  {
+    text: '[    0.331] Starting database...             [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 520,
+  },
+  {
+    text: '[    0.412] Starting web server...           [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 640,
+  },
   { text: '', cls: '', delay: 720 },
   { text: 'fjallos login:', cls: 'tty__boot-line--info', delay: 800 },
 ]
@@ -34,7 +50,7 @@ function writeLine(text, cls = '') {
   const line = document.createElement('span')
   line.className = `tty__boot-line${cls ? ' ' + cls : ''}`
   line.textContent = text
-  output.appendChild(line)
+  output.insertBefore(line, inputLine)
   output.scrollTop = output.scrollHeight
 }
 
@@ -64,7 +80,7 @@ function writeShellLine(promptText, cmd, outputText) {
     entry.appendChild(o)
   }
 
-  output.appendChild(entry)
+  output.insertBefore(entry, inputLine)
   output.scrollTop = output.scrollHeight
 }
 
@@ -122,7 +138,10 @@ async function handleEnter() {
       if (data.success) {
         csrfToken = data.csrf_token ?? ''
         writeLine(`Welcome, ${username}!`, 'tty__boot-line--ok')
-        writeLine('Type \'help\' for available commands. Type \'startx\' to launch the GUI.', 'tty__boot-line--dim')
+        writeLine(
+          "Type 'help' for available commands. Type 'startx' to launch the GUI.",
+          'tty__boot-line--dim',
+        )
         writeLine('', '')
         state = 'shell'
         showInput(`${username}@webdesktop:~$ `)
@@ -173,7 +192,7 @@ async function handleEnter() {
       writeShellLine(promptText, cmd, result.output ?? '')
 
       if (result.action === 'clear') {
-        output.innerHTML = ''
+        while (output.firstChild !== inputLine) output.removeChild(output.firstChild)
       } else if (result.action === 'logout') {
         await doLogout()
       } else if (result.action === 'startx') {
@@ -206,6 +225,7 @@ async function doLogout() {
   historyIndex = -1
 
   output.innerHTML = ''
+  output.appendChild(inputLine)
   inputLine.hidden = true
   writeLine('', '')
   writeLine('Logged out.', 'tty__boot-line--dim')
@@ -235,7 +255,7 @@ input.addEventListener('keydown', (e) => {
     }
   } else if (e.key === 'l' && e.ctrlKey && state === 'shell') {
     e.preventDefault()
-    output.innerHTML = ''
+    while (output.firstChild !== inputLine) output.removeChild(output.firstChild)
   }
 })
 

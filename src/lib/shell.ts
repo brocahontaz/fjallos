@@ -1,6 +1,6 @@
 import { db } from '@/db/client'
 import { fsNodes, terminalHistory } from '@/db/schema'
-import { desc, eq, isNull } from 'drizzle-orm'
+import { eq, isNull } from 'drizzle-orm'
 
 export interface ShellContext {
   role: 'owner' | 'guest'
@@ -68,10 +68,7 @@ const CONTACT_TEXT = `Contact Information
 
 Type 'startx' to see more in the GUI.`
 
-export async function executeCommand(
-  input: string,
-  context: ShellContext,
-): Promise<CommandResult> {
+export async function executeCommand(input: string, context: ShellContext): Promise<CommandResult> {
   const trimmed = input.trim()
   const parts = trimmed.split(/\s+/)
   const cmd = parts[0]?.toLowerCase() ?? ''
@@ -147,7 +144,10 @@ export async function executeCommand(
     }
 
     case 'login':
-      result = { output: 'Use the login prompt. Type logout first if already logged in.', exitCode: 0 }
+      result = {
+        output: 'Use the login prompt. Type logout first if already logged in.',
+        exitCode: 0,
+      }
       break
 
     case 'logout':
@@ -195,18 +195,13 @@ async function listDirectory(_path: string): Promise<string> {
       return 'readme.txt  about.txt  projects/'
     }
 
-    const children = await db
-      .select()
-      .from(fsNodes)
-      .where(eq(fsNodes.parentId, rootNode.id))
+    const children = await db.select().from(fsNodes).where(eq(fsNodes.parentId, rootNode.id))
 
     if (children.length === 0) {
       return '(empty directory)'
     }
 
-    return children
-      .map((n) => (n.type === 'dir' ? `${n.name}/` : n.name))
-      .join('  ')
+    return children.map((n) => (n.type === 'dir' ? `${n.name}/` : n.name)).join('  ')
   } catch {
     return 'readme.txt  about.txt  projects/'
   }

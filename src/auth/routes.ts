@@ -66,7 +66,10 @@ auth.post('/login', async (c) => {
 
   let role: 'owner' | 'guest'
 
-  if (username === ownerUsername && ownerPasswordHash) {
+  if (username === ownerUsername) {
+    if (!ownerPasswordHash) {
+      return c.json({ success: false, error: 'Login incorrect.' }, 401)
+    }
     let isValid = false
     try {
       isValid = await verify(password, ownerPasswordHash)
@@ -77,8 +80,10 @@ auth.post('/login', async (c) => {
       return c.json({ success: false, error: 'Login incorrect.' }, 401)
     }
     role = 'owner'
-  } else {
+  } else if (username === 'guest') {
     role = 'guest'
+  } else {
+    return c.json({ success: false, error: 'Login incorrect.' }, 401)
   }
 
   const now = new Date().toISOString()

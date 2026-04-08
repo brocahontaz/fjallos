@@ -53,19 +53,20 @@ app.get('/', (c) => {
 </head>
 <body class="tty-body">
   <div class="tty" id="tty" data-theme="dark">
-    <div class="tty__output" id="tty-output" aria-live="polite" role="log"></div>
-    <div class="tty__input-line" id="tty-input-line" hidden>
-      <span class="tty__prompt" id="tty-prompt" aria-hidden="true"></span>
-      <input
-        class="tty__input"
-        id="tty-input"
-        type="text"
-        aria-label="TTY input"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="none"
-        spellcheck="false"
-      />
+    <div class="tty__output" id="tty-output" aria-live="polite" role="log">
+      <div class="tty__input-line" id="tty-input-line" hidden>
+        <span class="tty__prompt" id="tty-prompt" aria-hidden="true"></span>
+        <input
+          class="tty__input"
+          id="tty-input"
+          type="text"
+          aria-label="TTY input"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="none"
+          spellcheck="false"
+        />
+      </div>
     </div>
   </div>
   <script src="/public/js/terminal.js" type="module"></script>
@@ -127,7 +128,16 @@ app.post('/windows/open', sessionMiddleware, async (c) => {
   const titleMap: Record<string, string> = { terminal: 'Terminal' }
 
   const windowHtml = (
-    <Window id={winId} app={appName} title={titleMap[appName] ?? appName} x={120} y={80} width={700} height={500} zIndex={10} />
+    <Window
+      id={winId}
+      app={appName}
+      title={titleMap[appName] ?? appName}
+      x={120}
+      y={80}
+      width={700}
+      height={500}
+      zIndex={10}
+    />
   )
 
   const taskbarUpdate = (

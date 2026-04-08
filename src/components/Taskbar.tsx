@@ -9,7 +9,9 @@ export const Taskbar: FC<TaskbarProps> = ({ role }) => {
     <footer class="taskbar" id="taskbar" role="toolbar" aria-label="Taskbar">
       <div class="taskbar__start">
         <button type="button" class="taskbar__launcher" aria-label="App launcher">
-          <span class="taskbar__launcher-icon" aria-hidden="true">⊞</span>
+          <span class="taskbar__launcher-icon" aria-hidden="true">
+            ⊞
+          </span>
         </button>
       </div>
       <ul class="taskbar__apps" id="taskbar-apps" aria-label="Running applications">
@@ -29,8 +31,15 @@ export const Taskbar: FC<TaskbarProps> = ({ role }) => {
         </li>
       </ul>
       <div class="taskbar__tray">
-        <span class="taskbar__role" aria-label={`Logged in as ${role}`}>{role}</span>
-        <button type="button" class="taskbar__tty-btn" aria-label="Switch to TTY" onclick="window.location.href='/'">
+        <span class="taskbar__role" aria-label={`Logged in as ${role}`}>
+          {role}
+        </span>
+        <button
+          type="button"
+          class="taskbar__tty-btn"
+          aria-label="Switch to TTY"
+          onclick="window.location.href='/'"
+        >
           TTY
         </button>
         <time class="taskbar__clock" id="taskbar-clock" aria-live="polite" datetime="">
