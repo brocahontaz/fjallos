@@ -14,7 +14,17 @@
     box-shadow: var(--window-shadow);
     overflow: hidden;
     contain: layout;
-    transition: box-shadow var(--transition-fast);
+    transition:
+      box-shadow var(--transition-fast),
+      opacity 0.15s ease,
+      scale 0.15s ease;
+  }
+
+  @starting-style {
+    .window {
+      opacity: 0;
+      scale: 0.96;
+    }
   }
 
   .window.window--focused {

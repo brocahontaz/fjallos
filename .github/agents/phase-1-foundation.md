@@ -6,17 +6,17 @@ Establish the project skeleton, tooling, auth, both entry points (TTY and GUI), 
 
 ## Checklist
 
-- [ ] Repo setup: Bun + Hono + Drizzle + TypeScript
-- [ ] Tooling: Prettier + Biome + Lefthook configured, `.editorconfig` committed
-- [ ] Auth: sessions table, `POST /auth/login` + `POST /auth/logout`, owner + guest middleware
-- [ ] TTY boot sequence + login prompt at `/`
-- [ ] Interactive shell (post-login) with core read commands
-- [ ] `startx` command → CSS View Transition to GUI
-- [ ] `/gui` route: short boot animation + graphical login screen (`/gui/login`)
-- [ ] Static desktop shell HTML + initial CSS tokens/reset
-- [ ] Window Manager JS (drag, resize, open/close, z-index)
-- [ ] Desktop layout, taskbar, clock
-- [ ] HTMX wired up: open/close windows via server fragments
+- [x] Repo setup: Bun + Hono + Drizzle + TypeScript
+- [x] Tooling: Prettier + Biome + Lefthook configured, `.editorconfig` committed
+- [x] Auth: sessions table, `POST /auth/login` + `POST /auth/logout`, owner + guest middleware
+- [x] TTY boot sequence + login prompt at `/`
+- [x] Interactive shell (post-login) with core read commands
+- [x] `startx` command → CSS View Transition to GUI
+- [x] `/gui` route: short boot animation + graphical login screen (`/gui/login`)
+- [x] Static desktop shell HTML + initial CSS tokens/reset
+- [x] Window Manager JS (drag, resize, open/close, z-index)
+- [x] Desktop layout, taskbar, clock
+- [x] HTMX wired up: open/close windows via server fragments
 
 ---
 

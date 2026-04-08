@@ -11,7 +11,7 @@ export interface ShellContext {
 export interface CommandResult {
   output: string
   exitCode: number
-  action?: 'clear' | 'logout' | 'startx' | 'theme'
+  action?: 'clear' | 'logout' | 'reboot' | 'startx' | 'startx-reset' | 'theme'
   themeValue?: string
 }
 
@@ -26,6 +26,7 @@ const HELP_TEXT = `Available commands:
   cv            Show curriculum vitae / resume
   contact       Show contact information
   theme [name]  Change terminal theme (dark/light/matrix/retro)
+  reboot        Reboot the system
   login         Log in as owner
   logout        Log out and return to login prompt
   exit          Exit shell
@@ -154,12 +155,24 @@ export async function executeCommand(input: string, context: ShellContext): Prom
       result = { output: 'Logging out...', exitCode: 0, action: 'logout' }
       break
 
+    case 'reboot':
+      result = { output: 'Rebooting...', exitCode: 0, action: 'reboot' }
+      break
+
     case 'exit':
       result = { output: 'Goodbye.', exitCode: 0, action: 'logout' }
       break
 
     case 'startx':
-      result = { output: 'Starting graphical environment...', exitCode: 0, action: 'startx' }
+      if (args[0] === '--reset') {
+        result = {
+          output: 'Starting graphical environment (resetting layout)...',
+          exitCode: 0,
+          action: 'startx-reset',
+        }
+      } else {
+        result = { output: 'Starting graphical environment...', exitCode: 0, action: 'startx' }
+      }
       break
 
     default:

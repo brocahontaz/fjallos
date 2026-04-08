@@ -54,7 +54,9 @@ export const Window: FC<PropsWithChildren<WindowProps>> = ({
             type="button"
             class="window__btn window__btn--close"
             aria-label="Close"
-            data-action="close"
+            hx-delete={`/windows/${id}`}
+            hx-target={`#win-${id}`}
+            hx-swap="delete"
           >
             ×
           </button>

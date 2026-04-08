@@ -15,35 +15,140 @@ let password = ''
 let csrfToken = ''
 let commandHistory = []
 let historyIndex = -1
+let bootAborted = false
 
 const BOOT_LINES = [
   { text: 'fjallos v0.1.0 -- personal web desktop', cls: 'tty__boot-line--info', delay: 0 },
-  { text: 'Copyright (c) 2024. All rights reserved.', cls: 'tty__boot-line--dim', delay: 60 },
+  { text: 'Copyright (c) 2026. All rights reserved.', cls: 'tty__boot-line--dim', delay: 60 },
   { text: '', cls: '', delay: 80 },
-  { text: '[    0.000] Initializing kernel...', cls: 'tty__boot-line--dim', delay: 120 },
-  { text: '[    0.042] Loading drivers...', cls: 'tty__boot-line--dim', delay: 180 },
   {
-    text: '[    0.118] Mounting filesystem...           [ OK ]',
+    text: 'BIOS v2.8.4  |  CPU: Web-Core i9 @ 4.20GHz  |  RAM: 16384MB',
+    cls: 'tty__boot-line--dim',
+    delay: 120,
+  },
+  { text: '', cls: '', delay: 140 },
+  { text: '[    0.000] Initializing kernel...', cls: 'tty__boot-line--dim', delay: 200 },
+  { text: '[    0.004] Loading initial ramdisk...', cls: 'tty__boot-line--dim', delay: 240 },
+  {
+    text: '[    0.011] Decompressing kernel image...   [ OK ]',
     cls: 'tty__boot-line--ok',
-    delay: 280,
+    delay: 290,
   },
   {
-    text: '[    0.204] Starting network services...     [ OK ]',
+    text: '[    0.019] Initializing memory manager...  [ OK ]',
     cls: 'tty__boot-line--ok',
-    delay: 400,
+    delay: 340,
+  },
+  { text: '[    0.027] Scanning PCI bus...', cls: 'tty__boot-line--dim', delay: 380 },
+  { text: '[    0.031]   0000:00:00.0  Host bridge', cls: 'tty__boot-line--dim', delay: 410 },
+  {
+    text: '[    0.033]   0000:00:02.0  VGA compatible controller',
+    cls: 'tty__boot-line--dim',
+    delay: 430,
+  },
+  { text: '[    0.035]   0000:00:1f.2  SATA controller', cls: 'tty__boot-line--dim', delay: 450 },
+  { text: '[    0.041] Loading device drivers...', cls: 'tty__boot-line--dim', delay: 490 },
+  {
+    text: '[    0.048]   drv: input/keyboard             [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 530,
   },
   {
-    text: '[    0.331] Starting database...             [ OK ]',
+    text: '[    0.052]   drv: net/virtio-net             [ OK ]',
     cls: 'tty__boot-line--ok',
-    delay: 520,
+    delay: 570,
   },
   {
-    text: '[    0.412] Starting web server...           [ OK ]',
+    text: '[    0.061]   drv: storage/nvme               [ OK ]',
     cls: 'tty__boot-line--ok',
-    delay: 640,
+    delay: 610,
   },
-  { text: '', cls: '', delay: 720 },
-  { text: 'fjallos login:', cls: 'tty__boot-line--info', delay: 800 },
+  {
+    text: '[    0.074]   drv: gpu/webgl2                 [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 650,
+  },
+  { text: '[    0.089] Mounting filesystems...', cls: 'tty__boot-line--dim', delay: 700 },
+  {
+    text: '[    0.094]   /              ext4     rw,relatime  [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 740,
+  },
+  {
+    text: '[    0.097]   /tmp           tmpfs    rw,nosuid    [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 770,
+  },
+  {
+    text: '[    0.102]   /home          ext4     rw,relatime  [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 810,
+  },
+  {
+    text: '[    0.118] Starting udev daemon...           [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 860,
+  },
+  { text: '[    0.135] Configuring network interfaces...', cls: 'tty__boot-line--dim', delay: 910 },
+  {
+    text: '[    0.141]   eth0: link up 1000Mbps full-duplex',
+    cls: 'tty__boot-line--dim',
+    delay: 950,
+  },
+  {
+    text: '[    0.148]   eth0: acquired address via DHCP  [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 990,
+  },
+  {
+    text: '[    0.161] Starting system logger...         [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 1040,
+  },
+  {
+    text: '[    0.179] Starting cron daemon...           [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 1080,
+  },
+  {
+    text: '[    0.204] Starting SSH daemon...            [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 1120,
+  },
+  { text: '[    0.221] Initialising SQLite database...', cls: 'tty__boot-line--dim', delay: 1170 },
+  {
+    text: '[    0.228]   checking schema integrity...    [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 1210,
+  },
+  {
+    text: '[    0.235]   running pending migrations...   [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 1250,
+  },
+  {
+    text: '[    0.251] Starting session manager...       [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 1300,
+  },
+  {
+    text: '[    0.274] Starting web server on :3000...   [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 1350,
+  },
+  {
+    text: '[    0.288] Starting virtual filesystem...    [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 1390,
+  },
+  {
+    text: '[    0.301] Loading shell environment...      [ OK ]',
+    cls: 'tty__boot-line--ok',
+    delay: 1430,
+  },
+  { text: '[    0.312] Reached target: System ready.', cls: 'tty__boot-line--info', delay: 1490 },
+  { text: '', cls: '', delay: 1540 },
+  { text: 'fjallos login:', cls: 'tty__boot-line--info', delay: 1600 },
 ]
 
 function writeLine(text, cls = '') {
@@ -86,11 +191,14 @@ function writeShellLine(promptText, cmd, outputText) {
 
 async function runBoot() {
   for (const line of BOOT_LINES) {
+    if (bootAborted) break
     await sleep(line.delay === 0 ? 0 : 40 + Math.random() * 30)
+    if (bootAborted) break
     writeLine(line.text, line.cls)
   }
 
-  await sleep(200)
+  await sleep(bootAborted ? 0 : 200)
+  bootAborted = false
   state = 'login-username'
   showInput('login: ')
 }
@@ -137,9 +245,9 @@ async function handleEnter() {
 
       if (data.success) {
         csrfToken = data.csrf_token ?? ''
-        writeLine(`Welcome, ${username}!`, 'tty__boot-line--ok')
+        writeLine(`Logged in as: ${username}`, 'tty__boot-line--ok')
         writeLine(
-          "Type 'help' for available commands. Type 'startx' to launch the GUI.",
+          "Type 'help' for available commands. Type 'startx' to launch the desktop.",
           'tty__boot-line--dim',
         )
         writeLine('', '')
@@ -195,9 +303,18 @@ async function handleEnter() {
         while (output.firstChild !== inputLine) output.removeChild(output.firstChild)
       } else if (result.action === 'logout') {
         await doLogout()
-      } else if (result.action === 'startx') {
+      } else if (result.action === 'reboot') {
+        await doReboot()
+      } else if (result.action === 'startx' || result.action === 'startx-reset') {
         await sleep(300)
-        window.location.href = '/gui'
+        const dest = result.action === 'startx-reset' ? '/gui?reset=1' : '/gui'
+        if (document.startViewTransition) {
+          document.startViewTransition(() => {
+            window.location.href = dest
+          })
+        } else {
+          window.location.href = dest
+        }
       } else if (result.action === 'theme' && result.themeValue) {
         tty.setAttribute('data-theme', result.themeValue)
       }
@@ -235,6 +352,33 @@ async function doLogout() {
   showInput('login: ')
 }
 
+async function doReboot() {
+  inputLine.hidden = true
+  writeLine('', '')
+  writeLine('Broadcast message: System going down for reboot NOW!', 'tty__boot-line--warn')
+  writeLine('', '')
+
+  try {
+    await fetch('/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    })
+  } catch {
+    // ignore
+  }
+
+  await sleep(800)
+  window.location.href = '/'
+}
+
+// Boot skip: listen on document so it works before the input is shown
+document.addEventListener('keydown', (e) => {
+  if ((e.key === 'Escape' || (e.key === 'c' && e.ctrlKey)) && state === 'booting') {
+    e.preventDefault()
+    bootAborted = true
+  }
+})
+
 input.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     handleEnter()
@@ -264,5 +408,16 @@ tty.addEventListener('click', () => {
   if (!inputLine.hidden) input.focus()
 })
 
-// Start boot sequence
-runBoot()
+// Restore existing session or run boot sequence
+const existingRole = tty.dataset.sessionRole
+const existingUsername = tty.dataset.sessionUsername
+const existingCsrf = tty.dataset.sessionCsrf
+
+if (existingRole && existingUsername && existingCsrf) {
+  username = existingUsername
+  csrfToken = existingCsrf
+  state = 'shell'
+  showInput(`${username}@webdesktop:~$ `)
+} else {
+  runBoot()
+}
