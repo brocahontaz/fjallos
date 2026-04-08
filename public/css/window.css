@@ -1,0 +1,156 @@
+@layer components {
+  .window {
+    position: absolute;
+    left: var(--x, 100px);
+    top: var(--y, 80px);
+    width: var(--w, 700px);
+    height: var(--h, 500px);
+    z-index: var(--z, 10);
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: var(--window-border);
+    border-radius: var(--window-border-radius);
+    box-shadow: var(--window-shadow);
+    overflow: hidden;
+    contain: layout;
+    transition: box-shadow var(--transition-fast);
+  }
+
+  .window.window--focused {
+    box-shadow: var(--window-shadow), 0 0 0 1px rgba(88, 166, 255, 0.3);
+  }
+
+  .window.window--minimised {
+    display: none;
+  }
+
+  .window.window--maximised {
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    height: calc(100vh - var(--taskbar-height)) !important;
+    border-radius: 0;
+  }
+
+  .window.window--snapped-left {
+    left: 0 !important;
+    top: 0 !important;
+    width: 50vw !important;
+    height: calc(100vh - var(--taskbar-height)) !important;
+  }
+
+  .window.window--snapped-right {
+    left: 50vw !important;
+    top: 0 !important;
+    width: 50vw !important;
+    height: calc(100vh - var(--taskbar-height)) !important;
+  }
+
+  .window__chrome {
+    display: flex;
+    align-items: center;
+    height: var(--window-chrome-height);
+    padding: 0 var(--space-3);
+    background: var(--color-surface-raised);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    cursor: grab;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .window__chrome:active {
+    cursor: grabbing;
+  }
+
+  .window__title {
+    flex: 1;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .window__controls {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .window__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 12px;
+    line-height: 1;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    color: transparent;
+  }
+
+  .window__btn:hover {
+    color: var(--color-bg-0);
+  }
+
+  .window__btn--minimise {
+    background: #f5a623;
+  }
+
+  .window__btn--minimise:hover {
+    background: #e6951c;
+  }
+
+  .window__btn--maximise {
+    background: #27c93f;
+  }
+
+  .window__btn--maximise:hover {
+    background: #1db530;
+  }
+
+  .window__btn--close {
+    background: #ff5f57;
+  }
+
+  .window__btn--close:hover {
+    background: #e5463f;
+  }
+
+  .window__body {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    min-height: 0;
+  }
+
+  .window__resize-handle {
+    position: absolute;
+    z-index: 1;
+  }
+
+  .window__resize-handle--se {
+    bottom: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    cursor: se-resize;
+  }
+
+  .window__resize-handle--s {
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 6px;
+    cursor: s-resize;
+  }
+
+  .window__resize-handle--e {
+    right: 0;
+    top: var(--window-chrome-height);
+    bottom: 6px;
+    width: 6px;
+    cursor: e-resize;
+  }
+}

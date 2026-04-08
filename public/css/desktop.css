@@ -1,0 +1,277 @@
+@layer layout {
+  .desktop {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    grid-template-rows: 1fr var(--taskbar-height);
+    overflow: hidden;
+    background: var(--color-bg-0);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+  }
+
+  .desktop__wallpaper {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(88, 166, 255, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(63, 185, 80, 0.04) 0%, transparent 40%),
+      linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .desktop__windows {
+    position: relative;
+    z-index: var(--z-windows);
+    flex: 1;
+  }
+}
+
+@layer components {
+  .taskbar {
+    position: relative;
+    z-index: var(--z-taskbar);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: var(--taskbar-height);
+    padding: 0 var(--space-2);
+    background: var(--taskbar-bg);
+    border-top: var(--taskbar-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .taskbar__start {
+    display: flex;
+    align-items: center;
+  }
+
+  .taskbar__launcher {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    color: var(--color-text-primary);
+    font-size: 1.2rem;
+    transition: background var(--transition-fast);
+  }
+
+  .taskbar__launcher:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .taskbar__apps {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    flex: 1;
+  }
+
+  .taskbar__app-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 0 var(--space-3);
+    height: 28px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    transition: background var(--transition-fast);
+  }
+
+  .taskbar__app-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .taskbar__app-btn--running {
+    border-bottom: 2px solid var(--color-accent);
+  }
+
+  .taskbar__tray {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-left: auto;
+  }
+
+  .taskbar__role {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .taskbar__tty-btn {
+    padding: 0 var(--space-2);
+    height: 22px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-mono);
+    transition: background var(--transition-fast);
+  }
+
+  .taskbar__tty-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--color-text-primary);
+  }
+
+  .taskbar__clock {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    min-width: 5ch;
+    text-align: right;
+  }
+
+  .gui-boot {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-0);
+    z-index: var(--z-modal);
+    transition: opacity 0.5s ease;
+  }
+
+  .gui-boot::after {
+    content: '';
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--color-accent);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .gui-login {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gui-login__wallpaper {
+    position: absolute;
+    inset: 0;
+    filter: blur(8px) brightness(0.4);
+  }
+
+  .login-card {
+    position: relative;
+    z-index: 1;
+    width: min(400px, calc(100vw - 2rem));
+    padding: var(--space-8);
+    background: rgba(20, 20, 20, 0.9);
+    border: var(--window-border);
+    border-radius: var(--window-border-radius);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--window-shadow);
+  }
+
+  .login-card__title {
+    font-family: var(--font-mono);
+    font-size: 1.75rem;
+    color: var(--color-accent);
+    margin-bottom: var(--space-1);
+    letter-spacing: 0.1em;
+  }
+
+  .login-card__subtitle {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-6);
+  }
+
+  .login-card__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .login-card__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .login-card__label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .login-card__input {
+    padding: var(--space-2) var(--space-3);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-base);
+    outline: none;
+    transition: border-color var(--transition-fast);
+  }
+
+  .login-card__input:focus {
+    border-color: var(--color-accent);
+  }
+
+  .login-card__error {
+    color: var(--color-error);
+    font-size: var(--font-size-sm);
+    padding: var(--space-2);
+    background: rgba(248, 81, 73, 0.1);
+    border: 1px solid rgba(248, 81, 73, 0.3);
+    border-radius: 4px;
+  }
+
+  .login-card__btn {
+    padding: var(--space-2) var(--space-4);
+    border-radius: 4px;
+    font-size: var(--font-size-base);
+    transition: all var(--transition-fast);
+  }
+
+  .login-card__btn--primary {
+    background: var(--color-accent);
+    color: #000;
+    font-weight: 600;
+  }
+
+  .login-card__btn--primary:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .login-card__btn--guest {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--color-text-secondary);
+  }
+
+  .login-card__btn--guest:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text-primary);
+  }
+}
+
+@layer utilities {
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

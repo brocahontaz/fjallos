@@ -1,0 +1,182 @@
+@layer layout {
+  .tty-body {
+    margin: 0;
+    padding: 0;
+    background: var(--tty-bg, #0d1117);
+    color: var(--tty-fg, #c9d1d9);
+    font-family: var(--font-mono, 'Courier New', monospace);
+    font-size: var(--font-size-sm, 0.875rem);
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .tty {
+    width: 100%;
+    height: 100%;
+    padding: var(--space-4, 1rem);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--tty-bg, #0d1117);
+    color: var(--tty-fg, #c9d1d9);
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .tty__output {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    word-break: break-all;
+    scrollbar-width: thin;
+    scrollbar-color: var(--tty-dim, #484f58) transparent;
+    padding-bottom: var(--space-2, 0.5rem);
+  }
+
+  .tty__output::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .tty__output::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .tty__output::-webkit-scrollbar-thumb {
+    background: var(--tty-dim, #484f58);
+    border-radius: 3px;
+  }
+
+  .tty__input-line {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2, 0.5rem);
+    flex-shrink: 0;
+    padding-top: var(--space-1, 0.25rem);
+  }
+
+  .tty__prompt {
+    color: var(--tty-green, #3fb950);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tty__input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--tty-fg, #c9d1d9);
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    caret-color: var(--tty-cursor, #58a6ff);
+  }
+
+  .tty__input::selection {
+    background: rgba(88, 166, 255, 0.3);
+  }
+}
+
+@layer components {
+  .tty__boot-line {
+    display: block;
+    margin-bottom: 1px;
+  }
+
+  .tty__boot-line--ok { color: var(--tty-green, #3fb950); }
+  .tty__boot-line--warn { color: var(--tty-yellow, #d29922); }
+  .tty__boot-line--err { color: var(--tty-red, #f85149); }
+  .tty__boot-line--dim { color: var(--tty-dim, #484f58); }
+  .tty__boot-line--info { color: var(--tty-blue, #58a6ff); }
+
+  .tty__login-label {
+    color: var(--tty-fg, #c9d1d9);
+  }
+
+  .tty__shell-prompt {
+    color: var(--tty-green, #3fb950);
+  }
+
+  .tty__shell-command {
+    color: var(--tty-fg, #c9d1d9);
+  }
+
+  .tty__shell-output {
+    color: var(--tty-fg, #c9d1d9);
+    white-space: pre-wrap;
+    margin-bottom: var(--space-2, 0.5rem);
+  }
+
+  .terminal {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--tty-bg, #0d1117);
+    color: var(--tty-fg, #c9d1d9);
+    font-family: var(--font-mono, 'Courier New', monospace);
+    font-size: var(--font-size-sm, 0.875rem);
+    padding: var(--space-3, 0.75rem);
+  }
+
+  .terminal__output {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    word-break: break-all;
+    scrollbar-width: thin;
+    scrollbar-color: var(--tty-dim, #484f58) transparent;
+  }
+
+  .terminal__motd {
+    color: var(--tty-dim, #484f58);
+    margin-bottom: var(--space-3, 0.75rem);
+    line-height: 1.6;
+  }
+
+  .terminal__history-entry {
+    margin-bottom: var(--space-2, 0.5rem);
+  }
+
+  .terminal__prompt-line {
+    display: flex;
+    gap: var(--space-2, 0.5rem);
+  }
+
+  .terminal__prompt-char {
+    color: var(--tty-green, #3fb950);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .terminal__command {
+    color: var(--tty-fg, #c9d1d9);
+  }
+
+  .terminal__output-text {
+    color: var(--tty-fg, #c9d1d9);
+    white-space: pre-wrap;
+    font-family: inherit;
+    font-size: inherit;
+    margin: var(--space-1, 0.25rem) 0;
+  }
+
+  .terminal__input-line {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2, 0.5rem);
+    flex-shrink: 0;
+    padding-top: var(--space-2, 0.5rem);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .terminal__input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--tty-fg, #c9d1d9);
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    caret-color: var(--tty-cursor, #58a6ff);
+  }
+}
