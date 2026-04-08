@@ -28,6 +28,7 @@ export const Window: FC<PropsWithChildren<WindowProps>> = ({
       id={`win-${id}`}
       data-app={app}
       data-window-id={id}
+      data-title={title}
       style={`--x:${x}px; --y:${y}px; --w:${width}px; --h:${height}px; --z:${zIndex};`}
       aria-label={title}
     >

@@ -6,6 +6,71 @@ const TASKBAR_HEIGHT = 40
 const SNAP_THRESHOLD = 20
 let highestZ = 10
 
+// --- Taskbar app context menu ---
+
+const appMenu = (() => {
+  const el = document.createElement('ul')
+  el.className = 'app-menu'
+  el.setAttribute('popover', 'auto')
+  document.addEventListener('DOMContentLoaded', () => document.body.appendChild(el))
+  return el
+})()
+
+function showAppMenu(launcher, app) {
+  appMenu.innerHTML = ''
+
+  const wins = [...document.querySelectorAll(`.window[data-app="${app}"]`)]
+  wins.forEach((win, i) => {
+    const li = document.createElement('li')
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'app-menu__item'
+    const label = win.dataset.title || `${app} ${i + 1}`
+    const isMin = win.classList.contains('window--minimised')
+    btn.textContent = `${label}${isMin ? ' (minimised)' : ''}`
+    btn.addEventListener('click', () => {
+      win.classList.remove('window--minimised')
+      bringToFront(win)
+      appMenu.hidePopover()
+    })
+    li.appendChild(btn)
+    appMenu.appendChild(li)
+  })
+
+  if (wins.length > 0) {
+    const divider = document.createElement('li')
+    divider.className = 'app-menu__divider'
+    appMenu.appendChild(divider)
+  }
+
+  const newLi = document.createElement('li')
+  const newBtn = document.createElement('button')
+  newBtn.type = 'button'
+  newBtn.className = 'app-menu__item'
+  newBtn.textContent = 'New window'
+  newBtn.addEventListener('click', () => {
+    openNewWindow(app)
+    appMenu.hidePopover()
+  })
+  newLi.appendChild(newBtn)
+  appMenu.appendChild(newLi)
+
+  // Position above the launcher button
+  const rect = launcher.getBoundingClientRect()
+  appMenu.style.left = `${rect.left}px`
+  appMenu.style.bottom = `${window.innerHeight - rect.top + 4}px`
+  appMenu.style.top = 'auto'
+  appMenu.showPopover()
+}
+
+function openNewWindow(app) {
+  htmx.ajax('POST', '/windows/open', {
+    target: '#windows-container',
+    swap: 'beforeend',
+    values: { app },
+  })
+}
+
 function bringToFront(win) {
   highestZ++
   win.style.setProperty('--z', String(highestZ))
@@ -181,12 +246,14 @@ function setupControls(win) {
           win.classList.contains('window--minimised'),
         )
       }
+      saveAllLayouts()
     } else if (action === 'maximise') {
       const wasMaximised = win.classList.contains('window--maximised')
       win.classList.toggle('window--maximised')
       if (wasMaximised) {
         win.classList.remove('window--snapped-left', 'window--snapped-right')
       }
+      saveAllLayouts()
     }
   })
 
@@ -199,44 +266,46 @@ export function setupWindow(win) {
   setupDrag(win)
   setupResize(win)
   setupControls(win)
-  restoreWindowState(win)
+  applyPendingRestore(win)
   bringToFront(win)
 }
 
-// --- sessionStorage layout persistence ---
+// --- sessionStorage window persistence ---
+// Saves the full ordered list of open windows (app + geometry) so they can be
+// re-opened after a page refresh within the same browser session.
 
-const STORAGE_KEY = 'wm_layout'
+const STORAGE_KEY = 'wm_windows'
+
+// Per-app queue of pending geometry to apply to the next new window of that app.
+const pendingRestores = {}
 
 function saveAllLayouts() {
   const container = document.getElementById('windows-container')
   if (!container) return
-  const layout = {}
+  const windows = []
   container.querySelectorAll('.window').forEach((win) => {
-    const id = win.id
-    const rect = getWindowRect(win)
-    layout[id] = {
-      ...rect,
+    windows.push({
+      app: win.dataset.app,
+      ...getWindowRect(win),
       minimised: win.classList.contains('window--minimised'),
       maximised: win.classList.contains('window--maximised'),
-    }
+    })
   })
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(layout))
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(windows))
 }
 
-function restoreWindowState(win) {
-  const raw = sessionStorage.getItem(STORAGE_KEY)
-  if (!raw) return
-  let layout
-  try {
-    layout = JSON.parse(raw)
-  } catch {
-    return
-  }
-  const saved = layout[win.id]
-  if (!saved) return
-  setWindowRect(win, saved)
-  if (saved.minimised) win.classList.add('window--minimised')
-  if (saved.maximised) win.classList.add('window--maximised')
+function queueRestore(app, layout) {
+  if (!pendingRestores[app]) pendingRestores[app] = []
+  pendingRestores[app].push(layout)
+}
+
+function applyPendingRestore(win) {
+  const app = win.dataset.app
+  if (!app || !pendingRestores[app]?.length) return
+  const layout = pendingRestores[app].shift()
+  setWindowRect(win, layout)
+  if (layout.minimised) win.classList.add('window--minimised')
+  if (layout.maximised) win.classList.add('window--maximised')
 }
 
 function observeWindows() {
@@ -264,15 +333,35 @@ function observeWindows() {
           updateLauncherState(node.dataset.app)
         }
       })
-      if (mutation.removedNodes.length) saveAllLayouts()
+      saveAllLayouts()
     })
   })
 
   observer.observe(container, { childList: true })
   container.querySelectorAll('.window').forEach(setupWindow)
 
-  // Taskbar launcher: focus existing window or open new
-  document.getElementById('taskbar-apps')?.addEventListener(
+  // Re-open windows that were open before the page refresh
+  const saved = (() => {
+    try {
+      return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '[]')
+    } catch {
+      return []
+    }
+  })()
+  for (const entry of saved) {
+    if (!entry.app) continue
+    queueRestore(entry.app, entry)
+    htmx.ajax('POST', '/windows/open', {
+      target: '#windows-container',
+      swap: 'beforeend',
+      values: { app: entry.app },
+    })
+  }
+
+  // Taskbar launcher: left-click focuses top window or opens new; right-click shows menu
+  const taskbarApps = document.getElementById('taskbar-apps')
+
+  taskbarApps?.addEventListener(
     'click',
     (e) => {
       const btn = e.target.closest('[data-app]')
@@ -290,15 +379,18 @@ function observeWindows() {
         top.classList.remove('window--minimised')
         bringToFront(top)
       } else {
-        htmx.ajax('POST', '/windows/open', {
-          target: '#windows-container',
-          swap: 'beforeend',
-          values: { app },
-        })
+        openNewWindow(app)
       }
     },
     { capture: true },
   )
+
+  taskbarApps?.addEventListener('contextmenu', (e) => {
+    const btn = e.target.closest('[data-app]')
+    if (!btn) return
+    e.preventDefault()
+    showAppMenu(btn, btn.dataset.app)
+  })
 }
 
 if (document.readyState === 'loading') {

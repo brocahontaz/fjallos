@@ -27,6 +27,7 @@ const HELP_TEXT = `Available commands:
   help              Show this help message
   clear             Clear the terminal
   echo [text]       Print text to the terminal
+  history           Show command history
   ls [path]         List files in directory
   pwd               Print working directory
   cd [path]         Change directory (~ to go home)

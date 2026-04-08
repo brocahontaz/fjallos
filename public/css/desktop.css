@@ -93,6 +93,44 @@
     border-bottom: 2px solid var(--color-accent);
   }
 
+  /* Per-app right-click context menu */
+  .app-menu {
+    position: fixed;
+    z-index: var(--z-popover);
+    min-width: 160px;
+    padding: var(--space-1) 0;
+    background: var(--color-surface-raised, #1c2128);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    list-style: none;
+    margin: 0;
+  }
+
+  .app-menu__item {
+    display: block;
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    text-align: left;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--transition-fast);
+  }
+
+  .app-menu__item:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .app-menu__divider {
+    height: 1px;
+    margin: var(--space-1) 0;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
   .taskbar__tray {
     display: flex;
     align-items: center;

@@ -3,6 +3,10 @@
  * Initialised for each .terminal element loaded via HTMX.
  */
 
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 /** Read SSE events from a fetch Response and return the final `done` payload. */
 async function readStream(response, onHtml) {
   const reader = response.body.getReader()
@@ -102,6 +106,20 @@ function initTerminal(term) {
     if (cmd) {
       cmdHistory.unshift(cmd)
       if (cmdHistory.length > 100) cmdHistory.pop()
+    }
+
+    // Client-side commands — never sent to server
+    if (cmd === 'history') {
+      const lines =
+        cmdHistory.length > 1
+          ? [...cmdHistory]
+              .reverse()
+              .map((c, i) => `${String(i + 1).padStart(4, ' ')}  ${escapeHtml(c)}`)
+              .join('\n')
+          : '(no history)'
+      appendEntry('history', lines)
+      inputEl.focus()
+      return
     }
 
     const csrf = document.getElementById('desktop')?.dataset.csrf ?? ''

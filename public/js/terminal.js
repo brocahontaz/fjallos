@@ -3,6 +3,10 @@
  * Handles boot sequence, login, and shell command execution.
  */
 
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
 const tty = document.getElementById('tty')
 const output = document.getElementById('tty-output')
 const inputLine = document.getElementById('tty-input-line')
@@ -320,6 +324,20 @@ async function handleEnter() {
 
     if (!cmd) {
       writeShellLine(promptText, '', '')
+      return
+    }
+
+    // Client-side commands — never sent to server
+    if (cmd === 'history') {
+      const lines =
+        commandHistory.length > 1
+          ? [...commandHistory]
+              .reverse()
+              .map((c, i) => `${String(i + 1).padStart(4, ' ')}  ${escapeHtml(c)}`)
+              .join('\n')
+          : '(no history)'
+      writeShellLine(promptText, 'history', lines)
+      showInput(`${getPromptText()} `)
       return
     }
 

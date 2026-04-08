@@ -165,7 +165,7 @@ app.post('/windows/open', sessionMiddleware, async (c) => {
 })
 
 app.delete('/windows/:id', sessionMiddleware, csrfMiddleware, () => {
-  return new Response(null, { status: 204 })
+  return new Response('', { status: 200 })
 })
 
 // App content - register terminal route BEFORE wildcard
