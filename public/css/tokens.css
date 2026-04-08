@@ -49,6 +49,7 @@
     --z-taskbar: 100;
     --z-overlay: 200;
     --z-modal: 300;
+    --z-popover: 400;
   }
 
   [data-theme='light'] {

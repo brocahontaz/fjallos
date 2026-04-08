@@ -1,5 +1,5 @@
 import { terminalApp } from '@/apps/terminal'
-import { sessionMiddleware } from '@/auth/middleware'
+import { csrfMiddleware, sessionMiddleware } from '@/auth/middleware'
 import { auth } from '@/auth/routes'
 import { Window } from '@/components/Window'
 import { Terminal } from '@/components/apps/Terminal'
@@ -39,7 +39,27 @@ app.use('/public/*', serveStatic({ root: './' }))
 app.route('/auth', auth)
 
 // TTY / terminal page
-app.get('/', (c) => {
+app.get('/', async (c) => {
+  const sessionId = getCookie(c, 'session_id')
+  let sessionData: { role: string; username: string; csrfToken: string } | null = null
+  if (sessionId) {
+    const now = new Date().toISOString()
+    const row = await db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.id, sessionId))
+      .limit(1)
+      .then((rows) => rows[0])
+    if (row && row.expiresAt > now) {
+      const username = row.role === 'owner' ? (process.env.OWNER_USERNAME ?? 'admin') : 'guest'
+      sessionData = { role: row.role, username, csrfToken: row.csrfToken }
+    }
+  }
+
+  const sessionAttrs = sessionData
+    ? ` data-session-role="${sessionData.role}" data-session-username="${sessionData.username}" data-session-csrf="${sessionData.csrfToken}"`
+    : ''
+
   return c.html(
     `<!DOCTYPE html>
 <html lang="en">
@@ -52,7 +72,7 @@ app.get('/', (c) => {
   <link rel="stylesheet" href="/public/css/apps/terminal.css" />
 </head>
 <body class="tty-body">
-  <div class="tty" id="tty" data-theme="dark">
+  <div class="tty" id="tty" data-theme="dark"${sessionAttrs}>
     <div class="tty__output" id="tty-output" aria-live="polite" role="log">
       <div class="tty__input-line" id="tty-input-line" hidden>
         <span class="tty__prompt" id="tty-prompt" aria-hidden="true"></span>
@@ -93,7 +113,8 @@ app.get('/gui', async (c) => {
   }
 
   if (session) {
-    return c.html(getDesktopHTML(session.role as 'owner' | 'guest', session.csrfToken))
+    const reset = c.req.query('reset') === '1'
+    return c.html(getDesktopHTML(session.role as 'owner' | 'guest', session.csrfToken, reset))
   }
 
   return c.html(getGuiLoginHTML())
@@ -144,6 +165,7 @@ app.post('/windows/open', sessionMiddleware, async (c) => {
     <div id="taskbar-apps" hx-swap-oob="beforeend">
       <li>
         <button
+          id={`taskbar-btn-${winId}`}
           type="button"
           class="taskbar__app-btn taskbar__app-btn--running"
           data-win-id={`win-${winId}`}
@@ -163,6 +185,11 @@ app.post('/windows/open', sessionMiddleware, async (c) => {
   )
 })
 
+app.delete('/windows/:id', sessionMiddleware, csrfMiddleware, (c) => {
+  const id = c.req.param('id')
+  return c.html(<button id={`taskbar-btn-${id}`} hx-swap-oob="delete"></button>)
+})
+
 // App content - register terminal route BEFORE wildcard
 app.route('/apps/terminal', terminalApp)
 
@@ -177,7 +204,7 @@ app.get('/apps/:appName', sessionMiddleware, async (c) => {
   return c.notFound()
 })
 
-function getDesktopHTML(role: 'owner' | 'guest', csrfToken: string): string {
+function getDesktopHTML(role: 'owner' | 'guest', csrfToken: string, reset = false): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -193,9 +220,17 @@ function getDesktopHTML(role: 'owner' | 'guest', csrfToken: string): string {
   <script src="/public/js/window-manager.js" type="module" defer></script>
 </head>
 <body>
-  <div class="desktop" data-theme="dark" id="desktop" data-csrf="${csrfToken}" data-role="${role}">
+  <div class="desktop" data-theme="dark" id="desktop" data-csrf="${csrfToken}" data-role="${role}"${reset ? ' data-reset-layout="1"' : ''}>
     <div class="desktop__wallpaper" aria-hidden="true"></div>
     <div class="desktop__windows" id="windows-container"></div>
+    <ul class="context-menu" id="desktop-context-menu" popover="manual" role="menu">
+      <li><button class="context-menu__item" role="menuitem"
+        hx-post="/windows/open" hx-vals='{"app":"terminal"}' hx-target="#windows-container"
+        hx-swap="beforeend" hx-headers='js:{"HX-CSRF-Token": document.getElementById("desktop").dataset.csrf}'
+        onclick="document.getElementById('desktop-context-menu').hidePopover()">
+        Open Terminal
+      </button></li>
+    </ul>
     <footer class="taskbar" id="taskbar" role="toolbar" aria-label="Taskbar">
       <div class="taskbar__start">
         <button class="taskbar__launcher" aria-label="App launcher">
@@ -232,6 +267,18 @@ function getDesktopHTML(role: 'owner' | 'guest', csrfToken: string): string {
         el.setAttribute('datetime', now.toISOString())
       }
     }
+
+    // Desktop right-click context menu
+    const contextMenu = document.getElementById('desktop-context-menu')
+    const wallpaper = document.querySelector('.desktop__wallpaper')
+    document.getElementById('desktop').addEventListener('contextmenu', (e) => {
+      if (e.target.closest('.window') || e.target.closest('.taskbar')) return
+      e.preventDefault()
+      contextMenu.style.left = e.clientX + 'px'
+      contextMenu.style.top = e.clientY + 'px'
+      contextMenu.showPopover()
+    })
+    document.addEventListener('click', () => contextMenu.hidePopover())
     updateClock()
     setInterval(updateClock, 1000)
   </script>
@@ -281,7 +328,11 @@ function getGuiLoginHTML(): string {
       })
       const data = await res.json()
       if (data.success) {
-        window.location.href = '/gui'
+        if (document.startViewTransition) {
+          document.startViewTransition(() => { window.location.href = '/gui' })
+        } else {
+          window.location.href = '/gui'
+        }
       } else {
         const err = document.getElementById('login-error')
         if (err) { err.textContent = data.error || 'Login incorrect.'; err.hidden = false }

@@ -163,12 +163,7 @@ function setupControls(win) {
 
     const action = btn.dataset.action
 
-    if (action === 'close') {
-      const winId = win.id
-      const taskbarBtn = document.querySelector(`[data-win-id="${winId}"]`)
-      taskbarBtn?.remove()
-      win.remove()
-    } else if (action === 'minimise') {
+    if (action === 'minimise') {
       win.classList.toggle('window--minimised')
       const winId = win.id
       const taskbarBtn = document.querySelector(`[data-win-id="${winId}"]`)
@@ -196,12 +191,57 @@ export function setupWindow(win) {
   setupDrag(win)
   setupResize(win)
   setupControls(win)
+  restoreWindowState(win)
   bringToFront(win)
 }
 
-function observeWindows() {
+// --- sessionStorage layout persistence ---
+
+const STORAGE_KEY = 'wm_layout'
+
+function saveAllLayouts() {
   const container = document.getElementById('windows-container')
   if (!container) return
+  const layout = {}
+  container.querySelectorAll('.window').forEach((win) => {
+    const id = win.id
+    const rect = getWindowRect(win)
+    layout[id] = {
+      ...rect,
+      minimised: win.classList.contains('window--minimised'),
+      maximised: win.classList.contains('window--maximised'),
+    }
+  })
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(layout))
+}
+
+function restoreWindowState(win) {
+  const raw = sessionStorage.getItem(STORAGE_KEY)
+  if (!raw) return
+  let layout
+  try {
+    layout = JSON.parse(raw)
+  } catch {
+    return
+  }
+  const saved = layout[win.id]
+  if (!saved) return
+  setWindowRect(win, saved)
+  if (saved.minimised) win.classList.add('window--minimised')
+  if (saved.maximised) win.classList.add('window--maximised')
+}
+
+function observeWindows() {
+  const desktop = document.getElementById('desktop')
+  if (desktop?.dataset.resetLayout === '1') {
+    sessionStorage.removeItem(STORAGE_KEY)
+  }
+
+  const container = document.getElementById('windows-container')
+  if (!container) return
+
+  // Save layout on any window move/resize via pointer events
+  document.addEventListener('pointerup', saveAllLayouts)
 
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -210,6 +250,8 @@ function observeWindows() {
           setupWindow(node)
         }
       })
+      // Save when windows are removed too
+      if (mutation.removedNodes.length) saveAllLayouts()
     })
   })
 
